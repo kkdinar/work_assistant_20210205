@@ -1,0 +1,13 @@
+{
+  "name": "work_assistant",
+  "version": "1.0.0",
+  "dependencies": {
+    "@koa/router": "^8.0.8",
+    "koa": "2.11.0",
+    "koa-bodyparser": "4.2.1",
+    "koa-pug": "^4.0.3",
+    "koa-router": "8.0.8",
+    "sequelize": "5.21.4",
+    "sqlite3": "4.1.1"
+  }
+}
