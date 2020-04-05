@@ -3,7 +3,7 @@ const app = new Koa();
 
 const Router = require('@koa/router');
 const router = new Router({
-    prefix: '/api'
+    //prefix: '/api'
 });
 
 const bodyParser = require('koa-bodyparser');
@@ -12,16 +12,16 @@ app.use(bodyParser());
 const config = require('./config.js');
 const routes = require('./scripts/routes.js');
 
-//router.get("/", routes.get_api);
+router.get("/", routes.get_api);
 
 //router.get("/get", routes.get);
-router.get("/", routes.get);
+router.get("/api", routes.get);
 
 //router.post("/post", routes.post);
-router.post("/", routes.post);
+router.post("/api", routes.post);
 
 //router.delete("/delete", routes.delete);
-router.delete("/", routes.delete);
+router.delete("/api", routes.delete);
 
 //router.put("/put", routes.put);
 

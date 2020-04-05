@@ -161,10 +161,9 @@ module.exports.delete_users = async (ctx) => {
     };
 };
 
-
+*/
 module.exports.get_api = (ctx) => {
     let message = "Ассистент - удобный доступ к Вашим данным \n";
     message = message + "Сервер Ассистент запущен";
     ctx.body = message;
 };
-*/

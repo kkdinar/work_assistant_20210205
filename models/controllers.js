@@ -14,10 +14,12 @@ module.exports.get = async ({
 }) => {
   let response = {};
   let rows = {};
-  if(type != 'main'){
+
+  if (!type) return response.error = 'Error, dont find type';
+  if (type != 'main') {
     let Obj = await Documents.findByPk(docID);
-    if (!Obj.Name) return response.error = 'Error, dont find docID';
-  }  
+    if (!(Obj || {}).Name) return response.error = 'Error, dont find docID';
+  }
   switch (type) {
     case 'main':
       await Documents.findAll().map(row => rows[row.id] = row.Name);
