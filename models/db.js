@@ -29,14 +29,62 @@ const DocColumns = require("./docColumns.js")(sequelize, Sequelize);
 db.DocColumns = DocColumns;
 
 db.getJournal = async (docID) => {
-    let rows = {};
+    let rows = [];
     let doc = await Documents.findByPk(docID);
     let Doc = sequelize.define(doc.Name, {}, {
         sequelize,
         modelName: doc.Name,
         freezeTableName: true //Таблица называется как модель);
     });
-    await Doc.findAll().map(row => rows[row.id] = '№ ' + row.id + ' от ' + toDate(row.createdAt));
+    //await Doc.findAll().map(row => rows[row.id] = '№ ' + row.id + ' от ' + toDate(row.createdAt));
+	await Doc.findAll().map((row,id) => {rows[id] = {Id: row.id, Date: toDate(row.createdAt)}});
+    return rows;
+};
+
+db._getDoc = async (docID, id) => {
+    let rows = [];
+    let doc = {};
+    switch (docID) {
+        case '3': //users
+            doc = {
+                Name: 'users'
+            };
+            break;
+        default:
+            doc = await Documents.findByPk(docID);
+            break;
+    };
+    let columns = await DocColumns.findAll({
+        where: {
+            TableId: docID
+        }
+    });
+    //console.log('columns=', columns);
+    let Columns = {};
+    columns.forEach(row => {
+        Columns[row.Name] = {
+            type: DataTypes[row.Type],
+        }
+    });
+    let Doc = sequelize.define(doc.Name, Columns, {
+        sequelize,
+        modelName: doc.Name,
+        freezeTableName: true //Таблица называется как модель);
+    });
+    //Получаем информацию из табоицы
+    doc = await Doc.findByPk(id);
+    //console.log('rows=',rows);
+    //Собираем данные для отправки
+    columns.forEach((row,id) => {
+        rows[id] = {
+            Id: id + 1, //Начинается с 0 
+            Name: row.Name,             
+            DataTypes: row.Type,
+            Value: doc[row.Name],
+            Date: toDate(doc.createdAt)        
+        }
+    });
+
     return rows;
 };
 

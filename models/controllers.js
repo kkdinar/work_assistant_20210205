@@ -12,77 +12,81 @@ module.exports.get = async ({
   id = '',
   docColumns = {}
 }) => {
-  let response = {};
-  let rows = {};
+  let Response = {};
+  let Rows = [];
 
-  if (!type) return response.error = 'Error, dont find type';
+  if (!type) return Response.Error = 'Error, dont find type';
   if (type != 'main') {
     let Obj = await Documents.findByPk(docID);
-    if (!(Obj || {}).Name) return response.error = 'Error, dont find docID';
+    if (!(Obj || {}).Name) return Response.Error = 'Error, dont find docID';
   }
   switch (type) {
     case 'main':
-      await Documents.findAll().map(row => rows[row.id] = row.Name);
+      //await Documents.findAll().map(row => Rows[row.id] = row.Name);
+      await Documents.findAll().map((row,id) => {Rows[id] = {Id: row.id, Name: row.Name}});
+      //Rows = await Documents.findAll();
       break;
 
     case 'journal':
       switch (docID) {
         case '1':
-          response = await db.testDbConnection();
+          Response = await db.testDbConnection();
           break;
         case '3':
-          await Users.findAll().map(row => rows[row.id] = row.ФИО);
+          //await Users.findAll().map(row => Rows[row.id] = row.ФИО);
+		  await Users.findAll().map((row,id) => {Rows[id] = {Id: row.id, Date: toDate(row.createdAt), Description: row.ФИО}});
           break;
         default:
-          rows = await db.getJournal(docID);
+          Rows = await db.getJournal(docID);
       };
       break;
 
     case 'doc':
-      rows = await db.getDoc(docID, id);
-      response.columnsTypes = await db.getDocColumnsTypes(docID);
+      //Rows = await db.getDoc(docID, id);
+      //Response.ColumnsTypes = await db.getDocColumnsTypes(docID);
+	    Rows = await db._getDoc(docID, id);
       break;
 
     case 'docColumns':
-      rows = await db.getDocColumns(docID);
+      Rows = await db.getDocColumns(docID);
       break;
 
     default:
-      response.error = 'Error, dont find doc type';
+      Response.Error = 'Error, dont find doc type';
       break;
   };
 
-  response.rows = rows;
+  Response.Rows = Rows;
   //Название документа
   let Model = await Documents.findByPk(docID);
-  response.title = (Model || {}).Name ? Model.Name : "Ассистент - Главная";
+  Response.Title = (Model || {}).Name ? Model.Name : "Ассистент - Главная";
 
-  //console.log('response=', response);
+  //console.log('Response=', Response);
 
-  return response;
+  return Response;
 
   //let Obj = await Documents.findByPk(docID);
   //Model = await db.getDocModel({
   //  Obj
   //});
 
-  //const title = req.query.title;
-  // var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
+  //const Title = req.query.Title;
+  // var condition = Title ? { Title: { [Op.like]: `%${Title}%` } } : null;
   /*
   let condition = id ? {
     id: id
   } : null;
   if (!Model) return 'Error, dont find model';
 
-  let rows = await Model.findAll({
+  let Rows = await Model.findAll({
     where: condition
   }); 
   */
 };
 
 module.exports.createMain = async (docColumns) => {
-  //let response;
-  //if (!docColumns) return response.error = 'Error, dont find docColumns';
+  //let Response;
+  //if (!docColumns) return Response.Error = 'Error, dont find docColumns';
   //Добавляем новый документ в таблицу Documents
   await Documents.create({
     Name: docColumns.Name,
@@ -90,96 +94,96 @@ module.exports.createMain = async (docColumns) => {
     Users: ',admin,'
   });
   //Создаём новую таблицу
-  let response = await db.createTable(docColumns);
-  return JSON.stringify(response);
+  let Response = await db.createTable(docColumns);
+  return JSON.stringify(Response);
 };
 
 module.exports.createJournal = async (docID) => {
-  let response = {};
+  let Response = {};
   let Obj = await Documents.findByPk(docID);
-  if (!Obj.Name) return response.error = 'Error, dont find docID';
-  response = await db.addDoc(docID);
-  return JSON.stringify(response);
+  if (!Obj.Name) return Response.Error = 'Error, dont find docID';
+  Response = await db.addDoc(docID);
+  return JSON.stringify(Response);
 };
 
 module.exports.createUser = async (docColumns) => {
-  let response = await Users.create({
+  let Response = await Users.create({
     Логин: docColumns.Login,
     Пароль: docColumns.Password,
     ФИО: docColumns.Login
   });
-  return JSON.stringify(response);
+  return JSON.stringify(Response);
 };
 /*
 module.exports.createDoc = async (docID, docColumns) => {
-  let response;
-  if (!docID) return response.error = 'Error, dont find docID';
-  if (!docColumns) return response.error = 'Error, dont find docColumns';
-  response = await db.addDocColumn(docID, docColumns);
-  return JSON.stringify(response);
+  let Response;
+  if (!docID) return Response.Error = 'Error, dont find docID';
+  if (!docColumns) return Response.Error = 'Error, dont find docColumns';
+  Response = await db.addDocColumn(docID, docColumns);
+  return JSON.stringify(Response);
 };
 */
 module.exports.updateDoc = async (docID, id, docColumns) => {
-  let response = {};
+  let Response = {};
   let Obj = await Documents.findByPk(docID);
-  if (!Obj.Name) return response.error = 'Error, dont find docID';
-  response = await db.updateDocColumns(docID, id, docColumns);
-  return JSON.stringify(response);
+  if (!Obj.Name) return Response.Error = 'Error, dont find docID';
+  Response = await db.updateDocColumns(docID, id, docColumns);
+  return JSON.stringify(Response);
 };
 
 module.exports.createColumn = async (docID, docColumns) => {
-  let response = {};
+  let Response = {};
   let Obj = await Documents.findByPk(docID);
-  if (!Obj.Name) return response.error = 'Error, dont find docID';
-  response = db.addDocColumn(docID, docColumns);
-  return JSON.stringify(response);
+  if (!Obj.Name) return Response.Error = 'Error, dont find docID';
+  Response = db.addDocColumn(docID, docColumns);
+  return JSON.stringify(Response);
 };
 
 module.exports.deleteMain = async (docID) => {
-  let response = {};
+  let Response = {};
   let Obj = await Documents.findByPk(docID);
-  if (!Obj.Name) return response.error = 'Error, dont find docID';
+  if (!Obj.Name) return Response.Error = 'Error, dont find docID';
   await DocColumns.destroy({
     where: {
       TableId: docID
     }
   });
-  response = await Documents.destroy({
+  Response = await Documents.destroy({
     where: {
       id: docID
     }
   });
 
-  return JSON.stringify(response);
+  return JSON.stringify(Response);
 };
 
 module.exports.deleteJournal = async (docID, id) => {
-  let response = {};
+  let Response = {};
   let Obj = await Documents.findByPk(docID);
-  if (!Obj.Name) return response.error = 'Error, dont find docID';
-  response = await db.deleteDocById(docID, id);
-  return JSON.stringify(response);
+  if (!Obj.Name) return Response.Error = 'Error, dont find docID';
+  Response = await db.deleteDocById(docID, id);
+  return JSON.stringify(Response);
 };
 /*
 module.exports.deleteDoc = async (docID, docColumns) => {
-  let response;
-  response = await db.deleteDocColumn(docID, docColumns);
-  return JSON.stringify(response);
+  let Response;
+  Response = await db.deleteDocColumn(docID, docColumns);
+  return JSON.stringify(Response);
 };
 */
 module.exports.deleteDocColumn = async (docID, id) => {
-  let response = {};
+  let Response = {};
   let Obj = await Documents.findByPk(docID);
-  if (!Obj.Name) return response.error = 'Error, dont find docID';
-  response = await db.deleteDocColumn(docID, id);
-  return JSON.stringify(response);
+  if (!Obj.Name) return Response.Error = 'Error, dont find docID';
+  Response = await db.deleteDocColumn(docID, id);
+  return JSON.stringify(Response);
 };
 /*
 module.exports.create = async ({
   docID,
   Obj
 }) => {
-  let response;
+  let Response;
   let Model;
   if (docID == '3') { //users    
     
@@ -191,7 +195,7 @@ module.exports.create = async ({
    
   }
 
-  return JSON.stringify(response);
+  return JSON.stringify(Response);
 };
 
 module.exports.destroy = async ({
@@ -223,27 +227,27 @@ module.exports.destroy = async ({
       Obj: findObj
     });
   }
-  if (!Model) return "error, dont find model";
+  if (!Model) return "Error, dont find model";
   //Удаляем из таблицы Model
-  let response = await Model.destroy({
+  let Response = await Model.destroy({
     where: {
       id: arrID
     }
   });
-  return JSON.stringify(response);
+  return JSON.stringify(Response);
 }
 
 module.exports.update = async ({
   docID,
   Obj
 }) => {
-  let response;
+  let Response;
   if (docID == '3') { //users    
     let row = await Users.findByPk(docID);
     row.Логин = Obj.Логин;
     row.Пароль = Obj.Пароль;
     row.ФИО = Obj.ФИО;
-    response = await row.save();
+    Response = await row.save();
   } else {
     let findObj = await Documents.findByPk(docID);
     let Model = await db.getDocModel({
@@ -258,7 +262,7 @@ module.exports.update = async ({
 
   }
 
-  return JSON.stringify(response);
+  return JSON.stringify(Response);
 };
 */
 module.exports.createDB = async (force, alter) => {

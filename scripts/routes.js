@@ -13,6 +13,7 @@ module.exports.get = async (ctx) => {
         id,
         docColumns
     });
+    console.log('response.body=', response);
     ctx.response.body = {
         response
     };
